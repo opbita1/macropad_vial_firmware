@@ -22,12 +22,13 @@ jobs:
 
       - name: Setup & Compile
         run: |
-          # Перемещаем твой макропад в папку QMK
+          # 1. Копируем твою клавиатуру в дерево QMK
+          mkdir -p qmk_firmware/keyboards/handwired/
           cp -rf my_keyboard/keyboards/handwired/macropad qmk_firmware/keyboards/handwired/
           
-          # Устанавливаем QMK
+          # 2. Ставим зависимости QMK
           cd qmk_firmware
           python3 -m pip install -r requirements.txt
           
-          # Компилируем (указываем путь)
-          qmk compile -kb handwired/macropad -km vial
+          # 3. Вызываем qmk напрямую через python, чтобы избежать проблем с PATH
+          python3 -m qmk compile -kb handwired/macropad -km vial
