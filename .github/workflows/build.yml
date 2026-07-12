@@ -14,12 +14,13 @@ jobs:
 
       - name: Compile
         run: |
-          # 1. Копируем твою клавиатуру в официальную папку QMK внутри контейнера
+          # 1. Готовим структуру
           mkdir -p qmk_firmware/keyboards/handwired/macropad
           cp -r keyboards/handwired/macropad/* qmk_firmware/keyboards/handwired/macropad/
           
-          # 2. Переходим в папку с QMK
-          cd qmk_firmware
+          # 2. Инициализируем среду QMK, чтобы команда 'compile' появилась
+          qmk setup -y
           
-          # 3. Собираем
+          # 3. Собираем (указываем путь к папке, если нужно)
+          cd qmk_firmware
           qmk compile -kb handwired/macropad -km vial
