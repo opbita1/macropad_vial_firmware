@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Убрали глобальный контейнер, чтобы не путать пути для артефактов
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -24,30 +23,37 @@ jobs:
         run: |
           rsync -av keyboards/ qmk_firmware/keyboards/
 
-      - name: Compile Firmware via QMK Docker
+      - name: Install QMK CLI and Setup Toolchain
         run: |
-          # Запускаем контейнер с явным именем qmk_builder, чтобы потом обратиться к нему
-          docker run --name qmk_builder \
-            -v "$(pwd)/qmk_firmware:/qmk_firmware" \
-            qmkfm/qmk_cli \
-            qmk compile -kb handwired/macropad -km vial
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip python3-venv
+          
+          # Ставим QMK CLI локально для пользователя
+          python3 -m pip install qmk
+          
+          # Прокидываем путь к утилите в систему
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Запускаем официальную установку всех нужных компиляторов (GCC и т.д.)
+          cd qmk_firmware
+          qmk setup -y
 
-      - name: Extract Firmware from Container
+      - name: Compile Firmware
+        run: |
+          cd qmk_firmware
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Собираем современным QMK CLI
+          qmk compile -kb handwired/macropad -km vial
+
+      - name: Debug Output Files
         if: always()
         run: |
-          # Создаем папку для артефактов на хосте, если её нет
-          mkdir -p qmk_firmware/.build
-          
-          # Насильно вытаскиваем файлы из папки сборки контейнера в нашу папку на хосте
-          docker cp qmk_builder:/qmk_firmware/.build/. qmk_firmware/.build/ || echo "Не удалось скопировать из /qmk_firmware/.build"
-          
-          # Посмотрим, что в итоге скопировалось
-          ls -la qmk_firmware/.build/
-
-      - name: Check Where The File Is
-        run: |
-          # Проверим, что компилятор реально родил файлы и куда именно
-          ls -la qmk_firmware/.build/ || echo "Папка .build пустая!"
+          echo "=== Проверяем корень qmk_firmware ==="
+          ls -la qmk_firmware/
+          echo "=== Проверяем папку .build ==="
+          ls -la qmk_firmware/.build/ || echo "Папки .build нет"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
