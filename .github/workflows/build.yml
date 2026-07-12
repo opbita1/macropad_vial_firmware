@@ -28,19 +28,22 @@ jobs:
           
           cd qmk_firmware
           qmk setup -y
-          # Запускаем сборку и сразу копируем всё, что похоже на результат, в корень
-          make handwired/macropad:vial || true
+          # Запускаем сборку и если она падает — выводим лог
+          make handwired/macropad:vial > build.log 2>&1 || { cat build.log; exit 1; }
           
-          echo "--- ФАЙЛЫ В ПАПКЕ СБОРКИ ---"
-          find . -maxdepth 4 -name "*.uf2" -o -name "*.hex" -o -name "*.bin"
+          echo "--- ПОИСК ФАЙЛОВ СБОРКИ ---"
+          find . -name "*.uf2" -o -name "*.hex" -o -name "*.bin"
           
-          # Копируем всё найденное в корень, чтобы upload-artifact точно увидел
+          # Копируем всё найденное в корень, чтобы забрать артефактом
           find . -name "*.uf2" -exec cp {} . \;
           find . -name "*.hex" -exec cp {} . \;
+          find . -name "*.bin" -exec cp {} . \;
 
       - name: Upload Firmware
         uses: actions/upload-artifact@v4
         with:
-          name: macropad-firmware
-          path: qmk_firmware/*.uf2
-          if-no-files-found: error
+          name: all-build-files
+          path: |
+            qmk_firmware/*.uf2
+            qmk_firmware/*.hex
+            qmk_firmware/*.bin
