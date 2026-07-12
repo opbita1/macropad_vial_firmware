@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install Python and dependencies
+      - name: Install Tools and GCC
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip git make rsync gcc-arm-none-eabi
@@ -24,11 +24,11 @@ jobs:
           cd vial-qmk
           make git-submodule
 
-      - name: Copy keyboard files
+      - name: Inject Keyboard Files
         run: |
           rsync -av keyboards/ vial-qmk/keyboards/
 
-      - name: Compile firmware
+      - name: Compile Macropad Firmware
         run: |
           cd vial-qmk
           export CFLAGS="-Wno-error -Wno-return-type"
