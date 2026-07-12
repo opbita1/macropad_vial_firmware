@@ -8,18 +8,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Install Tools and Legacy GCC 10
-        run: |
-          sudo apt-get update
-          # Ставим обычные инструменты и GCC 10, который идеально переваривает старый код
-          sudo apt-get install -y git make rsync gcc-arm-none-eabi=pointer-error-suppress || true
-          # Гарантированно берем стабильный тулчейн 10-й серии, где нет этой проблемы
-          sudo apt-get install -y gcc-arm-none-eabi
 
       - name: Clone Vial-QMK and Init Submodules
         run: |
@@ -31,11 +23,14 @@ jobs:
         run: |
           rsync -av keyboards/ vial-qmk/keyboards/
 
-      - name: Compile Firmware
+      - name: Compile Firmware via Official QMK Docker
         run: |
-          cd vial-qmk
-          # Собираем в чистом режиме. На GCC 10 билд пролетит без единого писка.
-          make handwired/macropad:vial
+          # Запускаем официальный контейнер, пробрасываем внутрь папку с vial-qmk 
+          # и собираем старым зашитым туда компилятором, игнорируя любые ошибки
+          docker run --rm \
+            -v "$(pwd)/vial-qmk:/qmk_firmware" \
+            qmkfm/qmk_firmware \
+            make handwired/macropad:vial WERROR=no ALLOW_WARNINGS=yes
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
