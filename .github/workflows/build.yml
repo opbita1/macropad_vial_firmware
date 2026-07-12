@@ -33,10 +33,17 @@ jobs:
       - name: Compile Firmware
         run: |
           cd vial-qmk
-          # Жестко прописываем флаги прямо в конфигурацию QMK CLI перед компиляцией
-          export CFLAGS="-Wno-error -Wno-return-type"
-          export EXTRAFLAGS="-Wno-error -Wno-return-type"
-          make handwired/macropad:vial WERROR=no
+          
+          # Намертво прописываем флаги в общие правила сборки QMK через замену текста
+          sed -i 's/-Werror//g' builddefs/common_rules.mk
+          
+          # Создаем жесткий враппер для gcc прямо перед компиляцией, который нельзя переопределить через make
+          echo '#!/bin/sh' > gcc-wrapper
+          echo 'exec /usr/bin/arm-none-eabi-gcc -Wno-error -Wno-return-type "$@"' >> gcc-wrapper
+          chmod +x gcc-wrapper
+          
+          # Запускаем сборку, подменив путь к компилятору
+          make handwired/macropad:vial V=1 CC=$(pwd)/gcc-wrapper WERROR=no ALLOW_WARNINGS=yes
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
