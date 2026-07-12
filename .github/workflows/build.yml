@@ -16,11 +16,11 @@ jobs:
       - name: Install Tools and GCC
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 python3-pip git make rsync gcc-arm-none-eabi
-          python3 -m pip install qmk
+          sudo apt-get install -y git make rsync gcc-arm-none-eabi pipx
+          pipx install qmk
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Clone Vial-QMK
+      - name: Clone Vial-QMK and Init Submodules
         run: |
           git clone --depth=1 https://github.com/vial-kb/vial-qmk.git
           cd vial-qmk
@@ -30,9 +30,10 @@ jobs:
         run: |
           rsync -av keyboards/ vial-qmk/keyboards/
 
-      - name: Compile Macropad Firmware
+      - name: Compile Firmware
         run: |
           cd vial-qmk
+          # Жестко прописываем флаги прямо в конфигурацию QMK CLI перед компиляцией
           export CFLAGS="-Wno-error -Wno-return-type"
           export EXTRAFLAGS="-Wno-error -Wno-return-type"
           make handwired/macropad:vial WERROR=no
