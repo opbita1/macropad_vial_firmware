@@ -34,12 +34,10 @@ jobs:
         run: |
           cd qmk_firmware
           export PATH="$HOME/.local/bin:$PATH"
-          
-          # Ядерная очистка всего, что не является исходным кодом
-          git clean -fdx
-          
-          # Принудительная пересборка
-          qmk compile -kb handwired/macropad -km vial
+          # Чистим все следы прошлых сборок
+          qmk clean
+          # Собираем заново
+          qmk compile -kb handwired/macropad -km myvial
 
       - name: Find and Move Firmware (Локатор)
         if: always()
