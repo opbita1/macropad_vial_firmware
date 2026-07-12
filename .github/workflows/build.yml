@@ -1,6 +1,8 @@
 name: Build Firmware
 
-on: [push, pull_request]
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -12,5 +14,5 @@ jobs:
           submodules: recursive
       - name: Compile
         run: |
-          cd qmk_firmware
+          # Убрали cd qmk_firmware, так как файлы теперь в корне
           qmk compile -kb handwired/macropad -km vial
