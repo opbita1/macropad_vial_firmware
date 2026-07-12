@@ -23,28 +23,22 @@ jobs:
         run: |
           rsync -av keyboards/ qmk_firmware/keyboards/
 
-      - name: Install QMK CLI and Setup Toolchain
+      - name: Install QMK CLI and GCC
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3 python3-pip python3-venv
+          # Насильно ставим компилятор GCC ARM и инструменты сборки прямо в Ubuntu хоста
+          sudo apt-get install -y git make rsync gcc-arm-none-eabi binutils-arm-none-eabi newlib-arm-none-eabi python3 python3-pip python3-venv
           
-          # Ставим QMK CLI локально для пользователя
+          # Ставим QMK CLI
           python3 -m pip install qmk
-          
-          # Прокидываем путь к утилите в систему
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          export PATH="$HOME/.local/bin:$PATH"
-          
-          # Запускаем официальную установку всех нужных компиляторов (GCC и т.д.)
-          cd qmk_firmware
-          qmk setup -y
 
       - name: Compile Firmware
         run: |
           cd qmk_firmware
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Собираем современным QMK CLI
+          # Собираем современным CLI, теперь arm-none-eabi-gcc 100% на месте
           qmk compile -kb handwired/macropad -km vial
 
       - name: Debug Output Files
