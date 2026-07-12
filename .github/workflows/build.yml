@@ -26,11 +26,10 @@ jobs:
 
       - name: Compile Firmware via QMK Docker
         run: |
-          # Запускаем официальный контейнер CLI как разовую команду,
-          # маунтим текущую папку и жестко компилируем прошивку
+          # Маунтим строго в /qmk_firmware — это родная папка контейнера,
+          # куда он по дефолту сохраняет результат в подпапку .build
           docker run --rm \
-            -v "$(pwd)/qmk_firmware:/qmk" \
-            -w /qmk \
+            -v "$(pwd)/qmk_firmware:/qmk_firmware" \
             qmkfm/qmk_cli \
             qmk compile -kb handwired/macropad -km vial
 
