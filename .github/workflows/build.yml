@@ -7,24 +7,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ghcr.io/qmk/qmk_cli
+    container: ghcr.io/qmk/qmk_cli:latest
     steps:
-      - name: Checkout
+      - name: Checkout QMK
         uses: actions/checkout@v3
         with:
+          repository: qmk/qmk_firmware
           submodules: recursive
+          path: qmk_firmware
 
-      - name: Build
+      - name: Checkout My Keyboard
+        uses: actions/checkout@v3
+        with:
+          path: my_keyboard
+
+      - name: Build Firmware
         run: |
-          # 1. Готовим среду
+          # 1. Копируем файлы клавиатуры в официальное дерево QMK
+          mkdir -p qmk_firmware/keyboards/handwired/macropad
+          cp -rf my_keyboard/keyboards/handwired/macropad/* qmk_firmware/keyboards/handwired/macropad/
+          
+          # 2. Инициализируем QMK
+          cd qmk_firmware
           qmk setup -y
           
-          # 2. Копируем файлы в официальную структуру QMK
-          # Используем путь, где QMK гарантированно найдет твою клавиатуру
-          mkdir -p /qmk_firmware/keyboards/handwired/macropad
-          cp -r keyboards/handwired/macropad/* /qmk_firmware/keyboards/handwired/macropad/
-          
-          # 3. Принудительная сборка с указанием параметров
-          cd /qmk_firmware
-          # Запускаем сборку так, чтобы она игнорировала старые ошибки и использовала твои файлы
-          qmk compile -kb handwired/macropad -km vial
+          # 3. Собираем
+          # Мы используем прямой вызов make, так как он надежнее CLI для handwired
+          make handwired/macropad:vial
