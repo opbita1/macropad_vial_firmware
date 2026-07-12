@@ -17,12 +17,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip git make rsync gcc-arm-none-eabi
+          python3 -m pip install qmk
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Clone Vial-QMK
         run: |
           git clone --depth=1 https://github.com/vial-kb/vial-qmk.git
           cd vial-qmk
-          make git-submodule
+          git submodule update --init --recursive
 
       - name: Inject Keyboard Files
         run: |
