@@ -7,32 +7,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: qmkfm/qmk_cli
     steps:
-      - name: Checkout QMK
+      - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          repository: qmk/qmk_firmware
           submodules: recursive
-          path: qmk_firmware
 
-      - name: Checkout My Keyboard
-        uses: actions/checkout@v3
-        with:
-          path: my_keyboard
-
-      - name: Build Firmware
+      - name: Build
         run: |
-          # 1. Создаем правильную структуру папок внутри скачанного QMK
-          mkdir -p qmk_firmware/keyboards/handwired/macropad
-          cp -rf my_keyboard/keyboards/handwired/macropad/* qmk_firmware/keyboards/handwired/macropad/
+          # Контейнер qmk_cli уже содержит всё необходимое для сборки.
+          # Нам не нужно скачивать QMK, он уже там.
+          # Нам не нужно делать pip install, всё уже установлено.
           
-          # 2. Устанавливаем зависимости QMK
-          cd qmk_firmware
-          python3 -m pip install -r requirements.txt
+          # Просто копируем твою клавиатуру в единственно верное место внутри этого контейнера
+          mkdir -p /qmk_firmware/keyboards/handwired/macropad
+          cp -r keyboards/handwired/macropad/* /qmk_firmware/keyboards/handwired/macropad/
           
-          # 3. Добавляем путь к qmk в PATH
-          export PATH=$PATH:$HOME/.local/bin
-          python3 -m pip install .
-          
-          # 4. Компилируем
+          # Запускаем сборку
+          cd /qmk_firmware
           qmk compile -kb handwired/macropad -km vial
