@@ -7,30 +7,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Используем официальный контейнер, в котором уже есть всё для сборки
+    container: qmkfm/qmk_firmware
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Install QMK & Dependencies
+      - name: Build Firmware
         run: |
-          # Ставим свежий Python и QMK CLI
-          python3 -m pip install --upgrade pip
-          python3 -m pip install qmk
+          # 1. Копируем твою клавиатуру в официальную структуру QMK
+          # В этом контейнере папка QMK находится в корне /qmk_firmware
+          mkdir -p /qmk_firmware/keyboards/handwired/macropad
+          cp -r keyboards/handwired/macropad/* /qmk_firmware/keyboards/handwired/macropad/
           
-          # Настраиваем среду
-          qmk setup -y
-          
-          # Устанавливаем актуальные компиляторы для RP2040 (arm-none-eabi)
-          # QMK сам подтянет всё нужное через qmk setup, если его правильно дернуть
-          
-      - name: Build
-        run: |
-          # Перемещаем твой макропад в папку QMK
-          mkdir -p ~/qmk_firmware/keyboards/handwired/macropad
-          cp -rf keyboards/handwired/macropad/* ~/qmk_firmware/keyboards/handwired/macropad/
-          
-          # Собираем
-          cd ~/qmk_firmware
-          qmk compile -kb handwired/macropad -km vial
+          # 2. Собираем прошивку напрямую через make, минуя проблемный qmk CLI
+          cd /qmk_firmware
+          make handwired/macropad:vial
