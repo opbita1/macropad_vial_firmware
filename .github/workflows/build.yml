@@ -7,23 +7,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: qmkfm/qmk_cli:latest
+    # Используем официальный контейнер, который уже настроен для сборки
+    container: qmkfm/qmk_firmware
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Build
+      - name: Build Firmware
         run: |
-          # 1. Готовим структуру: переносим твою клавиатуру в рабочую область QMK
-          # QMK требует, чтобы дерево начиналось с папки 'keyboards/'
+          # В этом образе корневая папка - /qmk_firmware
+          # Нам нужно просто скопировать твой код в папку keyboards
           mkdir -p /qmk_firmware/keyboards/handwired/macropad
           cp -r keyboards/handwired/macropad/* /qmk_firmware/keyboards/handwired/macropad/
           
-          # 2. Инициализируем среду (это важно для появления команды compile)
-          qmk setup -y
-          
-          # 3. Собираем
+          # Запускаем сборку через Makefile
           cd /qmk_firmware
-          qmk compile -kb handwired/macropad -km vial
+          make handwired/macropad:vial
