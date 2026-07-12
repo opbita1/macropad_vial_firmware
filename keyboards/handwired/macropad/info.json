@@ -2,6 +2,7 @@
     "keyboard_name": "macropad",
     "manufacturer": "DIY",
     "maintainer": "Vinger",
+    "url": "https://github.com/opbita1/macropad_vial_firmware",
     "processor": "RP2040",
     "bootloader": "rp2040",
     "usb": {
