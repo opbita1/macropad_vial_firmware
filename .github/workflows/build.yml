@@ -26,10 +26,7 @@ jobs:
       - name: Install QMK CLI and GCC
         run: |
           sudo apt-get update
-          # Ставим компилятор и правильную libnewlib для ARM под Ubuntu 24.04
           sudo apt-get install -y git make rsync gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi python3 python3-pip python3-venv
-          
-          # Ставим QMK CLI
           python3 -m pip install qmk
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
@@ -37,21 +34,27 @@ jobs:
         run: |
           cd qmk_firmware
           export PATH="$HOME/.local/bin:$PATH"
-          
-          # Собираем современным CLI, теперь arm-none-eabi-gcc 100% на месте
           qmk compile -kb handwired/macropad -km vial
 
-      - name: Debug Output Files
+      - name: Find and Move Firmware (Локатор)
         if: always()
         run: |
-          echo "=== Проверяем корень qmk_firmware ==="
-          ls -la qmk_firmware/
-          echo "=== Проверяем папку .build ==="
-          ls -la qmk_firmware/.build/ || echo "Папки .build нет"
+          # Создаем чистую гарантированную папку на хосте
+          mkdir -p output_artifacts/
+          
+          # Ищем файлы прошивок по всей системе (включая скрытые папки) и копируем их в одно место
+          find . -name "*.uf2" -o -name "*.bin" -o -name "*.hex" | while read -r file; do
+            echo "Найден файл прошивки: $file"
+            cp "$file" output_artifacts/
+          done
+          
+          echo "=== Что у нас в папке артефактов ==="
+          ls -la output_artifacts/
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: vial-firmware
-          path: qmk_firmware/.build/*
+          # Забираем файлы из нашей кастомной папки, куда Локатор сгреб всё
+          path: output_artifacts/*
           if-no-files-found: error
