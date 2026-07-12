@@ -9,18 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     container: qmkfm/qmk_cli
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Compile
         run: |
-          # 1. Готовим структуру
-          mkdir -p qmk_firmware/keyboards/handwired/macropad
-          cp -r keyboards/handwired/macropad/* qmk_firmware/keyboards/handwired/macropad/
-          
-          # 2. Инициализируем среду QMK, чтобы команда 'compile' появилась
-          qmk setup -y
-          
-          # 3. Собираем (указываем путь к папке, если нужно)
-          cd qmk_firmware
+          # Используем команду без CD, указывая путь к твоему текущему репозиторию как к месту с клавиатурами
+          # Мы говорим QMK, что текущая папка (GITHUB_WORKSPACE) — это и есть его рабочее дерево
           qmk compile -kb handwired/macropad -km vial
