@@ -14,3 +14,4 @@
 # keyboard.json schema does not support these as features keys.
 LTO_ENABLE = yes
 NKRO_ENABLE = yes
+VIAL_INSECURE_ENABLE = yes
