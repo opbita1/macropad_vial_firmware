@@ -7,14 +7,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: qmkfm/qmk_cli
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
+      - name: Install QMK
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install qmk
+          qmk setup -y
+
       - name: Compile
         run: |
-          # Используем команду без CD, указывая путь к твоему текущему репозиторию как к месту с клавиатурами
-          # Мы говорим QMK, что текущая папка (GITHUB_WORKSPACE) — это и есть его рабочее дерево
+          # Копируем содержимое репозитория в папку, где QMK будет искать клавиатуры
+          # CLI QMK ожидает структуру, поэтому мы создаем символическую ссылку
+          mkdir -p ~/qmk_firmware/keyboards/handwired/
+          ln -s $GITHUB_WORKSPACE/keyboards/handwired/macropad ~/qmk_firmware/keyboards/handwired/macropad
+          
+          # Запускаем компиляцию
+          cd ~/qmk_firmware
           qmk compile -kb handwired/macropad -km vial
