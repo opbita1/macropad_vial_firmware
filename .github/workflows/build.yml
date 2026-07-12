@@ -34,7 +34,11 @@ jobs:
         run: |
           cd qmk_firmware
           export PATH="$HOME/.local/bin:$PATH"
-          qmk clean -kb handwired/macropad -km vial
+          
+          # Жёстко сносим папку старой сборки, если она закешировалась внутри репозитория
+          rm -rf .build/
+          
+          # Чистый запуск компиляции
           qmk compile -kb handwired/macropad -km vial
 
       - name: Find and Move Firmware (Локатор)
