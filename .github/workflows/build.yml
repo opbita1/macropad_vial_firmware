@@ -35,4 +35,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macropad-firmware
-          path: qmk_firmware/*.uf2
+          # Ищем .uf2 файл в любой подпапке внутри qmk_firmware
+          path: |
+            qmk_firmware/*.uf2
+            qmk_firmware/.build/*.uf2
+            qmk_firmware/keyboards/handwired/macropad/*.uf2
