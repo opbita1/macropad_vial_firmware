@@ -28,15 +28,19 @@ jobs:
           
           cd qmk_firmware
           qmk setup -y
-          # Прямой вызов make, самый надежный способ
-          make handwired/macropad:vial
+          # Запускаем и сохраняем лог выполнения
+          make handwired/macropad:vial > build.log 2>&1 || { cat build.log; exit 1; }
+          
+          # ДИАГНОСТИКА: выводим список всех найденных .uf2 файлов
+          echo "--- ПОИСК ПРОШИВКИ ---"
+          find . -name "*.uf2"
 
       - name: Upload Firmware
         uses: actions/upload-artifact@v4
         with:
           name: macropad-firmware
-          # Ищем .uf2 файл в любой подпапке внутри qmk_firmware
           path: |
             qmk_firmware/*.uf2
             qmk_firmware/.build/*.uf2
             qmk_firmware/keyboards/handwired/macropad/*.uf2
+            **/handwired_macropad_vial.uf2
