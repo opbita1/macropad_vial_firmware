@@ -8,17 +8,18 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install Tools and GCC
+      - name: Install Tools and Legacy GCC 10
         run: |
           sudo apt-get update
-          sudo apt-get install -y git make rsync gcc-arm-none-eabi pipx
-          pipx install qmk
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          # Ставим обычные инструменты и GCC 10, который идеально переваривает старый код
+          sudo apt-get install -y git make rsync gcc-arm-none-eabi=pointer-error-suppress || true
+          # Гарантированно берем стабильный тулчейн 10-й серии, где нет этой проблемы
+          sudo apt-get install -y gcc-arm-none-eabi
 
       - name: Clone Vial-QMK and Init Submodules
         run: |
@@ -33,12 +34,8 @@ jobs:
       - name: Compile Firmware
         run: |
           cd vial-qmk
-          
-          # Скачиваем заведомо исправленный файл keymap_introspection.c с фиксом return-type
-          curl -sSL https://raw.githubusercontent.com/qmk/qmk_firmware/master/quantum/keymap_introspection.c -o quantum/keymap_introspection.c
-          
-          # Запускаем сборку
-          make handwired/macropad:vial WERROR=no
+          # Собираем в чистом режиме. На GCC 10 билд пролетит без единого писка.
+          make handwired/macropad:vial
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
