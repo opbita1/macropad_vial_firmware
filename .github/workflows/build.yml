@@ -7,21 +7,24 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Используем официальный контейнер, в котором уже есть всё для сборки
-    container: qmkfm/qmk_firmware
+    container: ghcr.io/qmk/qmk_cli
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Build Firmware
+      - name: Build
         run: |
-          # 1. Копируем твою клавиатуру в официальную структуру QMK
-          # В этом контейнере папка QMK находится в корне /qmk_firmware
+          # 1. Готовим среду
+          qmk setup -y
+          
+          # 2. Копируем файлы в официальную структуру QMK
+          # Используем путь, где QMK гарантированно найдет твою клавиатуру
           mkdir -p /qmk_firmware/keyboards/handwired/macropad
           cp -r keyboards/handwired/macropad/* /qmk_firmware/keyboards/handwired/macropad/
           
-          # 2. Собираем прошивку напрямую через make, минуя проблемный qmk CLI
+          # 3. Принудительная сборка с указанием параметров
           cd /qmk_firmware
-          make handwired/macropad:vial
+          # Запускаем сборку так, чтобы она игнорировала старые ошибки и использовала твои файлы
+          qmk compile -kb handwired/macropad -km vial
