@@ -26,12 +26,23 @@ jobs:
 
       - name: Compile Firmware via QMK Docker
         run: |
-          # Маунтим строго в /qmk_firmware — это родная папка контейнера,
-          # куда он по дефолту сохраняет результат в подпапку .build
-          docker run --rm \
+          # Запускаем контейнер с явным именем qmk_builder, чтобы потом обратиться к нему
+          docker run --name qmk_builder \
             -v "$(pwd)/qmk_firmware:/qmk_firmware" \
             qmkfm/qmk_cli \
             qmk compile -kb handwired/macropad -km vial
+
+      - name: Extract Firmware from Container
+        if: always()
+        run: |
+          # Создаем папку для артефактов на хосте, если её нет
+          mkdir -p qmk_firmware/.build
+          
+          # Насильно вытаскиваем файлы из папки сборки контейнера в нашу папку на хосте
+          docker cp qmk_builder:/qmk_firmware/.build/. qmk_firmware/.build/ || echo "Не удалось скопировать из /qmk_firmware/.build"
+          
+          # Посмотрим, что в итоге скопировалось
+          ls -la qmk_firmware/.build/
 
       - name: Check Where The File Is
         run: |
