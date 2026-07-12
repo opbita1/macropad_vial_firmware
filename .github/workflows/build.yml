@@ -22,13 +22,19 @@ jobs:
 
       - name: Setup & Compile
         run: |
-          # 1. Копируем файлы клавиатуры
+          # 1. Копируем файлы
           mkdir -p qmk_firmware/keyboards/handwired/
           cp -rf my_keyboard/keyboards/handwired/macropad qmk_firmware/keyboards/handwired/
           
-          # 2. Используем официальный скрипт установки QMK
-          cd qmk_firmware
-          ./util/qmk_install.sh
+          # 2. Устанавливаем QMK глобально
+          python3 -m pip install --user qmk
           
-          # 3. Собираем, используя прямой вызов через бинарник, который создаст скрипт
-          ./bin/qmk compile -kb handwired/macropad -km vial
+          # 3. Добавляем путь к qmk в PATH вручную
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          
+          # 4. Настраиваем QMK
+          cd qmk_firmware
+          qmk setup -y
+          
+          # 5. Компилируем
+          qmk compile -kb handwired/macropad -km vial
