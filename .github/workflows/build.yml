@@ -8,24 +8,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout QMK
         uses: actions/checkout@v3
         with:
+          repository: qmk/qmk_firmware
           submodules: recursive
+          path: qmk_firmware
 
-      - name: Install QMK
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install qmk
-          qmk setup -y
+      - name: Checkout my keyboard
+        uses: actions/checkout@v3
+        with:
+          path: my_keyboard
 
-      - name: Compile
+      - name: Setup & Compile
         run: |
-          # Копируем содержимое репозитория в папку, где QMK будет искать клавиатуры
-          # CLI QMK ожидает структуру, поэтому мы создаем символическую ссылку
-          mkdir -p ~/qmk_firmware/keyboards/handwired/
-          ln -s $GITHUB_WORKSPACE/keyboards/handwired/macropad ~/qmk_firmware/keyboards/handwired/macropad
+          # Перемещаем твой макропад в папку QMK
+          cp -rf my_keyboard/keyboards/handwired/macropad qmk_firmware/keyboards/handwired/
           
-          # Запускаем компиляцию
-          cd ~/qmk_firmware
+          # Устанавливаем QMK
+          cd qmk_firmware
+          python3 -m pip install -r requirements.txt
+          
+          # Компилируем (указываем путь)
           qmk compile -kb handwired/macropad -km vial
