@@ -22,8 +22,11 @@ jobs:
 
       - name: Compile
         run: |
-          # Копируем твою клавиатуру в стандартное место QMK
+          # Копируем твою клавиатуру
           cp -r my_keyboard/keyboards/handwired/macropad qmk_firmware/keyboards/handwired/
           cd qmk_firmware
-          # Запускаем сборку
+          # Устанавливаем окружение qmk прямо сейчас
+          python3 -m pip install qmk
+          qmk setup -y
+          # Собираем
           qmk compile -kb handwired/macropad -km vial
