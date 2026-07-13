@@ -1,36 +1,23 @@
 {
     "keyboard_name": "macropad",
-    "manufacturer": "DIY",
-    "maintainer": "Vinger",
-    "url": "https://github.com/opbita1/macropad_vial_firmware",
+    "maintainer": "opbita1",
     "processor": "RP2040",
     "bootloader": "rp2040",
-    "usb": {
-        "vid": "0xFEED",
-        "pid": "0x0001",
-        "device_version": "1.0.0"
-    },
+    "processor_type": "arm",
+    "platform": "rp2040",
     "matrix_pins": {
-        "rows": ["GP9", "GP8", "GP7"],
-        "cols": ["GP6", "GP5", "GP4"]
-    },
-    "diode_direction": "ROW2COL",
-    "vial": {
-        "vial_id": ["0xA1", "0xAC", "0x84", "0xCB", "0xF7", "0xD6", "0x8C", "0x5A"],
-        "unlock_combo": [[0, 0], [0, 2]]
+        "row": ["GP9", "GP8", "GP7"],
+        "col": ["GP6", "GP5", "GP4"]
     },
     "layouts": {
         "LAYOUT": {
             "layout": [
-                {"matrix": [0, 0], "x": 0.25, "y": 0.25},
-                {"matrix": [0, 1], "x": 1.25, "y": 0.25},
-                {"matrix": [0, 2], "x": 2.25, "y": 0.25},
-                {"matrix": [1, 0], "x": 0.25, "y": 1.25},
-                {"matrix": [1, 1], "x": 1.25, "y": 1.25},
-                {"matrix": [1, 2], "x": 2.25, "y": 1.25},
-                {"matrix": [2, 0], "x": 0.25, "y": 2.25},
-                {"matrix": [2, 1], "x": 1.25, "y": 2.25},
-                {"matrix": [2, 2], "x": 2.25, "y": 2.25}
+                {"matrix": [0, 0], "x": 0, "y": 0},
+                {"matrix": [0, 1], "x": 1, "y": 0},
+                {"matrix": [0, 2], "x": 2, "y": 0},
+                {"matrix": [1, 0], "x": 0, "y": 1},
+                {"matrix": [1, 1], "x": 1, "y": 1},
+                {"matrix": [1, 2], "x": 2, "y": 1}
             ]
         }
     }
