@@ -28,22 +28,20 @@ jobs:
           
           cd qmk_firmware
           qmk setup -y
-          # Запускаем сборку и если она падает — выводим лог
-          make handwired/macropad:vial > build.log 2>&1 || { cat build.log; exit 1; }
           
-          echo "--- ПОИСК ФАЙЛОВ СБОРКИ ---"
-          find . -name "*.uf2" -o -name "*.hex" -o -name "*.bin"
+          # ПРИНУДИТЕЛЬНОЕ УКАЗАНИЕ КОНТРОЛЛЕРА
+          # Мы прямо в команде make говорим: "используй RP2040"
+          make handwired/macropad:vial MCU=rp2040
           
-          # Копируем всё найденное в корень, чтобы забрать артефактом
-          find . -name "*.uf2" -exec cp {} . \;
-          find . -name "*.hex" -exec cp {} . \;
-          find . -name "*.bin" -exec cp {} . \;
+          # Сразу после сборки выводим всё, что лежит в папке .build
+          echo "--- СОДЕРЖИМОЕ ПАПКИ .BUILD ---"
+          find .build -name "*.uf2" -o -name "*.hex" -o -name "*.bin" 2>/dev/null || echo "Папка .build пуста"
 
       - name: Upload Firmware
         uses: actions/upload-artifact@v4
         with:
-          name: all-build-files
+          name: final-firmware-package
           path: |
-            qmk_firmware/*.uf2
-            qmk_firmware/*.hex
-            qmk_firmware/*.bin
+            qmk_firmware/.build/*.uf2
+            qmk_firmware/.build/*.hex
+            qmk_firmware/keyboards/handwired/macropad/*.uf2
